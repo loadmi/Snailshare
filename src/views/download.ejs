@@ -1,0 +1,674 @@
+<div class="download-progress-container">
+  <div class="file-header">
+    <div class="file-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <polyline points="10 9 9 9 8 9"></polyline>
+      </svg>
+    </div>
+    <div class="file-info">
+      <h1>Downloading</h1>
+      <p class="file-name"><%= fileName %> <span class="file-size"><%= fileSize %></span></p>
+    </div>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-stat">
+      <div class="stat-label">Current Speed</div>
+      <div class="stat-value" id="downloadSpeed">0 KB/s</div>
+    </div>
+
+    <div class="progress-wrapper">
+      <div class="progress-bar-container">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+      <div class="progress-info">
+        <span id="progressPercent">0%</span>
+        <span id="timeRemaining">Calculating...</span>
+      </div>
+    </div>
+
+    <div class="progress-stat">
+      <div class="stat-label">Boost Multiplier</div>
+      <div class="stat-value boost" id="boostMultiplier">1.0x</div>
+    </div>
+  </div>
+
+  <iframe src="<%= downloadUrl %>" style="display:none;"></iframe>
+
+  <div class="boost-section">
+    <div class="boost-header">
+      <h2>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+        </svg>
+        Speed Booster
+      </h2>
+      <p>Solve math challenges to accelerate your download!</p>
+    </div>
+
+    <div class="challenge-card">
+      <div class="challenge-difficulty">
+        <div class="difficulty-label">Difficulty:</div>
+        <div class="difficulty-buttons">
+          <button type="button" class="difficulty-btn active" data-difficulty="easy">Easy</button>
+          <button type="button" class="difficulty-btn" data-difficulty="medium">Medium</button>
+          <button type="button" class="difficulty-btn" data-difficulty="hard">Hard</button>
+        </div>
+      </div>
+
+      <div class="challenge-content">
+        <div class="challenge-question">
+          <span id="challengeText"><%= challenge.questionText %></span>
+        </div>
+
+        <form id="challengeForm" class="challenge-form">
+          <div class="challenge-input-group">
+            <input type="text" id="answer" autocomplete="off" placeholder="Your answer..." autofocus>
+            <button type="submit" class="submit-btn">Submit</button>
+          </div>
+        </form>
+
+        <div id="challengeResult" class="challenge-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  :root {
+    --primary: #4F46E5;
+    --primary-dark: #4338CA;
+    --primary-light: #818CF8;
+    --secondary: #06B6D4;
+    --secondary-dark: #0891B2;
+    --accent: #F472B6;
+    --dark: #1E293B;
+    --darker: #0F172A;
+    --light: #F8FAFC;
+    --gray-100: #F1F5F9;
+    --gray-200: #E2E8F0;
+    --gray-300: #CBD5E1;
+    --gray-600: #475569;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --error: #EF4444;
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    --radius-sm: 0.375rem;
+    --radius: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-full: 9999px;
+  }
+  .download-progress-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .file-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .file-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    background: rgba(79, 70, 229, 0.1);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: var(--primary-light);
+  }
+
+  .file-info {
+    flex-grow: 1;
+  }
+
+  .file-info h1 {
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .file-name {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: var(--gray-300);
+  }
+
+  .file-size {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: normal;
+  }
+
+  .progress-section {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .progress-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: var(--gray-300);
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+  }
+
+  .stat-value.boost {
+    color: var(--primary-light);
+    background: rgba(79, 70, 229, 0.2);
+  }
+
+  .progress-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .progress-bar-container {
+    width: 100%;
+    height: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-bar {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+    border-radius: var(--radius-full);
+    transition: width 0.5s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+            45deg,
+            rgba(255, 255, 255, 0.2) 25%,
+            transparent 25%,
+            transparent 50%,
+            rgba(255, 255, 255, 0.2) 50%,
+            rgba(255, 255, 255, 0.2) 75%,
+            transparent 75%,
+            transparent
+    );
+    background-size: 1rem 1rem;
+    animation: progressStripes 1s linear infinite;
+    z-index: 1;
+  }
+
+  @keyframes progressStripes {
+    from { background-position: 1rem 0; }
+    to { background-position: 0 0; }
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: var(--gray-300);
+  }
+
+  .boost-section {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .boost-header {
+    background: rgba(79, 70, 229, 0.1);
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .boost-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+    color: var(--primary-light);
+  }
+
+  .boost-header p {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--gray-300);
+  }
+
+  .challenge-card {
+    padding: 1.5rem;
+  }
+
+  .challenge-difficulty {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .difficulty-label {
+    margin-right: 1rem;
+    font-weight: 500;
+  }
+
+  .difficulty-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .difficulty-btn {
+    padding: 0.375rem 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: var(--radius-full);
+    color: var(--gray-300);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .difficulty-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--light);
+  }
+
+  .difficulty-btn.active {
+    background: var(--primary);
+    color: white;
+  }
+
+  .challenge-content {
+    background: rgba(30, 41, 59, 0.5);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+  }
+
+  .challenge-question {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: var(--light);
+  }
+
+  .challenge-form {
+    max-width: 400px;
+    margin: 0 auto 1rem;
+  }
+
+  .challenge-input-group {
+    display: flex;
+  }
+
+  .challenge-input-group input {
+    flex-grow: 1;
+    border-radius: var(--radius) 0 0 var(--radius);
+    border-right: none;
+    font-size: 1rem;
+  }
+
+  .submit-btn {
+    border-radius: 0 var(--radius) var(--radius) 0;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0 1.25rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .submit-btn:hover {
+    background: var(--primary-dark);
+  }
+
+  .challenge-result {
+    text-align: center;
+    font-weight: 500;
+    min-height: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .result-success {
+    color: var(--success);
+  }
+
+  .result-error {
+    color: var(--error);
+  }
+
+  @media (max-width: 768px) {
+    .file-header {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .file-icon {
+      margin: 0 auto 1rem;
+    }
+
+    .file-name {
+      justify-content: center;
+    }
+
+    .challenge-difficulty {
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+  }
+</style>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  // Store challenge data
+  let currentChallenge = JSON.parse('<%- JSON.stringify(challenge) %>');
+  let selectedDifficulty = 'easy';
+  let sessionId = '<%= sessionId %>';
+
+  // Initialize UI elements
+  const challengeForm = document.getElementById('challengeForm');
+  const challengeText = document.getElementById('challengeText');
+  const challengeResult = document.getElementById('challengeResult');
+  const answerInput = document.getElementById('answer');
+  const boostMultiplierElement = document.getElementById('boostMultiplier');
+  const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+
+  // Progress tracking elements
+  const progressBar = document.getElementById('progressBar');
+  const progressPercent = document.getElementById('progressPercent');
+  const downloadSpeedElement = document.getElementById('downloadSpeed');
+  const timeRemainingElement = document.getElementById('timeRemaining');
+
+  // Set up WebSocket for realtime updates if enabled
+  <% if (socketEnabled) { %>
+  const socket = io();
+
+  socket.on('connect', () => {
+    console.log('WebSocket connected');
+    socket.emit('joinDownloadSession', sessionId);
+  });
+
+  socket.on('downloadProgress', (data) => {
+    // Update progress bar
+    updateProgress(data.progress);
+
+    // Update download speed
+    downloadSpeedElement.textContent = formatSpeed(data.currentSpeed);
+
+    // Update time remaining
+    timeRemainingElement.textContent = formatTimeRemaining(data.timeRemaining);
+
+    // Update boost multiplier
+    boostMultiplierElement.textContent = data.boostMultiplier.toFixed(1) + 'x';
+
+    // Add animation when boost changes
+    if (parseFloat(boostMultiplierElement.dataset.lastValue || '1.0') !== data.boostMultiplier) {
+      boostMultiplierElement.classList.add('pulse-animation');
+      setTimeout(() => {
+        boostMultiplierElement.classList.remove('pulse-animation');
+      }, 1000);
+      boostMultiplierElement.dataset.lastValue = data.boostMultiplier;
+    }
+  });
+  <% } else { %>
+  // Simulate progress without WebSocket
+  let progress = 0;
+  const simulateProgress = () => {
+    progress += Math.random() * 0.5;
+    if (progress > 99.9) progress = 99.9;
+
+    updateProgress(progress);
+
+    // Simulate speed updates
+    if (Math.random() > 0.7) {
+      const multiplier = parseFloat(boostMultiplierElement.textContent) || 1;
+      const speed = 100 * 1024 * multiplier;
+      downloadSpeedElement.textContent = formatSpeed(speed);
+
+      const remainingSeconds = (100 - progress) * 10 / multiplier;
+      timeRemainingElement.textContent = formatTimeRemaining(remainingSeconds);
+    }
+
+    if (progress < 99.9) {
+      requestAnimationFrame(simulateProgress);
+    }
+  };
+  setTimeout(simulateProgress, 500);
+  <% } %>
+
+  function updateProgress(value) {
+    progressBar.style.width = value + '%';
+    progressPercent.textContent = Math.round(value) + '%';
+  }
+
+  // Challenge form submission
+  challengeForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const userAnswer = answerInput.value.trim();
+
+    if (!userAnswer) {
+      showChallengeResult('Please enter an answer', 'error');
+      return;
+    }
+
+    // Get current URL query parameters to preserve them
+    const queryString = window.location.search;
+
+    // Show loading state
+    answerInput.disabled = true;
+    challengeForm.querySelector('button').disabled = true;
+    showChallengeResult('Checking answer...', 'loading');
+
+    // Send challenge answer to server with current URL parameters appended
+    fetch('/challenge' + queryString, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sessionId,
+        answer: parseInt(userAnswer, 10),
+        difficulty: selectedDifficulty
+      }),
+    })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Update UI with success
+                showChallengeResult(data.message, 'success');
+
+                // Add animation to boost multiplier
+                boostMultiplierElement.classList.add('pulse-animation');
+                setTimeout(() => {
+                  boostMultiplierElement.classList.remove('pulse-animation');
+                }, 1000);
+
+                // Update boost multiplier
+                boostMultiplierElement.textContent = data.boostMultiplier.toFixed(1) + 'x';
+                boostMultiplierElement.dataset.lastValue = data.boostMultiplier;
+
+                // Update speed display
+                downloadSpeedElement.textContent = formatSpeed(data.currentSpeed);
+
+                // Update to new challenge
+                if (data.newChallenge) {
+                  currentChallenge = data.newChallenge;
+                  challengeText.textContent = currentChallenge.questionText;
+                }
+              } else {
+                // Show error message
+                showChallengeResult(data.message, 'error');
+              }
+
+              // Clear the answer field and re-enable form
+              answerInput.value = '';
+              answerInput.disabled = false;
+              challengeForm.querySelector('button').disabled = false;
+              answerInput.focus();
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              showChallengeResult('Error connecting to server', 'error');
+              answerInput.disabled = false;
+              challengeForm.querySelector('button').disabled = false;
+            });
+  });
+
+  // Helper function to show challenge result
+  function showChallengeResult(message, type) {
+    challengeResult.textContent = message;
+    challengeResult.className = 'challenge-result';
+
+    if (type === 'success') {
+      challengeResult.classList.add('result-success');
+    } else if (type === 'error') {
+      challengeResult.classList.add('result-error');
+    } else if (type === 'loading') {
+      challengeResult.innerHTML = `
+        <span class="loading-spinner"></span>
+        ${message}
+      `;
+
+      // Add loading spinner styles if needed
+      if (!document.getElementById('spinner-style')) {
+        const style = document.createElement('style');
+        style.id = 'spinner-style';
+        style.textContent = `
+          .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-light);
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+          }
+
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+
+          .pulse-animation {
+            animation: pulse 0.5s ease-in-out;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    }
+  }
+
+  // Difficulty selection
+  difficultyBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      // Update active state
+      difficultyBtns.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+
+      // Set selected difficulty
+      selectedDifficulty = this.dataset.difficulty;
+
+      // Clear previous results
+      challengeResult.textContent = '';
+
+      // Request a new challenge with the selected difficulty, preserving current URL parameters
+      const queryString = window.location.search;
+      fetch('/challenge' + queryString, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId,
+          requestNewChallenge: true,
+          difficulty: selectedDifficulty
+        }),
+      })
+              .then(response => response.json())
+              .then(data => {
+                if (data.newChallenge) {
+                  currentChallenge = data.newChallenge;
+                  challengeText.textContent = currentChallenge.questionText;
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                showChallengeResult('Error loading challenge', 'error');
+              });
+    });
+  });
+
+  // Helper function to format speed
+  function formatSpeed(bytesPerSecond) {
+    if (bytesPerSecond < 1024) return bytesPerSecond.toFixed(0) + ' B/s';
+    if (bytesPerSecond < 1024 * 1024) return (bytesPerSecond / 1024).toFixed(2) + ' KB/s';
+    return (bytesPerSecond / 1024 / 1024).toFixed(2) + ' MB/s';
+  }
+
+  // Helper function to format time remaining
+  function formatTimeRemaining(seconds) {
+    if (seconds === Infinity || seconds <= 0) return 'Calculating...';
+
+    if (seconds < 60) return Math.ceil(seconds) + ' seconds';
+    if (seconds < 3600) {
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = Math.ceil(seconds % 60);
+      return `${minutes} min ${remainingSeconds} sec`;
+    }
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return `${hours} hr ${minutes} min`;
+  }
+
+  // Focus the answer input when the page loads
+  window.onload = function() {
+    answerInput.focus();
+  };
+</script>
