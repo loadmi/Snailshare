@@ -93,6 +93,7 @@ async function copyToClipboard(text) {
     }
 }
 
+
 // Add event listener for copy buttons with data-copy-text attribute
 document.addEventListener('DOMContentLoaded', () => {
     const copyButtons = document.querySelectorAll('[data-copy-text]');

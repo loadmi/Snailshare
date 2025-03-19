@@ -1,15 +1,16 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "nodenext",
+    "lib": ["es6"],
+    "target": "es6",
+    "module": "esnext", // Updated module option
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "nodenext",
-    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*.test.ts"]

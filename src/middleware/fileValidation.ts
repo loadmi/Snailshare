@@ -4,7 +4,7 @@ import config from '../config/index.js';
 
 // List of allowed file extensions and MIME types
 const ALLOWED_EXTENSIONS = [
-    '.jpg', '.jpeg', '.png', '.gif', '.pdf', '.doc', '.docx',
+    '.webp','.jpg', '.jpeg', '.png', '.gif', '.pdf', '.doc', '.docx',
     '.xls', '.xlsx', '.txt', '.zip', '.rar', '.7z', '.mp3',
     '.mp4', '.avi', '.mov'
 ];

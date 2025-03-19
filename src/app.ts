@@ -8,6 +8,7 @@ const __dirname = dirname(__filename);
 
 import express from 'express';
 import https from 'https';
+import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import compression from 'compression';
@@ -16,11 +17,10 @@ import morgan from 'morgan';
 import cors from 'cors';
 import { Server as SocketServer } from 'socket.io';
 import expressLayouts from 'express-ejs-layouts';
-
-import config from './config/index.js';
-import routes from './routes/index.js';
-import databaseService from './services/DatabaseService.js';
-import fileService from './services/FileService.js';
+import config from './config';
+import DatabaseService from './services/DatabaseService';
+import router from './routes';
+import FileService from './services/FileService';
 import helmet from 'helmet';
 
 // Initialize the app
@@ -85,7 +85,7 @@ app.set('layout extractStyles', true);
 app.set('layout extractScripts', true);
 
 // Initialize database
-databaseService.initialize().catch((err) => {
+DatabaseService.initialize().catch((err) => {
     console.error('Failed to initialize database:', err);
     process.exit(1);
 });
@@ -94,7 +94,7 @@ databaseService.initialize().catch((err) => {
 const ONE_HOUR = 60 * 60 * 1000;
 setInterval(async () => {
     try {
-        const count = await fileService.cleanupExpiredFiles();
+        const count = await FileService.cleanupExpiredFiles();
         if (count > 0) {
             console.log(`Cleaned up ${count} expired files`);
         }
@@ -104,7 +104,7 @@ setInterval(async () => {
 }, ONE_HOUR);
 
 // Routes
-app.use('/', routes);
+app.use('/', router);
 
 // 404 handler
 app.use((req, res) => {
@@ -139,7 +139,7 @@ try {
 } catch (error) {
     console.error('Failed to load SSL certificates:', error);
     console.log('Falling back to HTTP server (not recommended for production)');
-    server = require('http').createServer(app);
+    server = http.createServer(app);
 }
 
 // Set up Socket.IO for real-time updates

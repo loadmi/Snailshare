@@ -1,7 +1,8 @@
 <div class="download-progress-container">
   <div class="file-header">
     <div class="file-icon">
-      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
         <polyline points="14 2 14 8 20 8"></polyline>
         <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -11,7 +12,11 @@
     </div>
     <div class="file-info">
       <h1>Downloading</h1>
-      <p class="file-name"><%= fileName %> <span class="file-size"><%= fileSize %></span></p>
+      <p class="file-name">
+        <%= fileName %> <span class="file-size">
+            <%= fileSize %>
+          </span>
+      </p>
     </div>
   </div>
 
@@ -38,11 +43,11 @@
   </div>
 
   <iframe src="<%= downloadUrl %>" style="display:none;"></iframe>
-
   <div class="boost-section">
     <div class="boost-header">
       <h2>
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
         </svg>
         Speed Booster
@@ -62,7 +67,9 @@
 
       <div class="challenge-content">
         <div class="challenge-question">
-          <span id="challengeText"><%= challenge.questionText %></span>
+          <span id="challengeText">
+            <%= challenge.questionText %>
+          </span>
         </div>
 
         <form id="challengeForm" class="challenge-form">
@@ -108,6 +115,7 @@
     --radius-lg: 1rem;
     --radius-full: 9999px;
   }
+
   .download-progress-container {
     max-width: 800px;
     margin: 0 auto;
@@ -227,24 +235,27 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(
-            45deg,
-            rgba(255, 255, 255, 0.2) 25%,
-            transparent 25%,
-            transparent 50%,
-            rgba(255, 255, 255, 0.2) 50%,
-            rgba(255, 255, 255, 0.2) 75%,
-            transparent 75%,
-            transparent
-    );
+    background: linear-gradient(45deg,
+        rgba(255, 255, 255, 0.2) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.2) 75%,
+        transparent 75%,
+        transparent);
     background-size: 1rem 1rem;
     animation: progressStripes 1s linear infinite;
     z-index: 1;
   }
 
   @keyframes progressStripes {
-    from { background-position: 1rem 0; }
-    to { background-position: 0 0; }
+    from {
+      background-position: 1rem 0;
+    }
+
+    to {
+      background-position: 0 0;
+    }
   }
 
   .progress-info {
@@ -405,6 +416,9 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
+  // Define socketEnabled based on your application's logic
+  const socketEnabled = '<%= socketEnabled %>';
+
   // Store challenge data
   let currentChallenge = JSON.parse('<%- JSON.stringify(challenge) %>');
   let selectedDifficulty = 'easy';
@@ -425,61 +439,59 @@
   const timeRemainingElement = document.getElementById('timeRemaining');
 
   // Set up WebSocket for realtime updates if enabled
-  <% if (socketEnabled) { %>
-  const socket = io();
+  if (socketEnabled) {
+    const socket = io();
 
-  socket.on('connect', () => {
-    console.log('WebSocket connected');
-    socket.emit('joinDownloadSession', sessionId);
-  });
+    socket.on('connect', () => {
+      console.log('WebSocket connected');
+      socket.emit('joinDownloadSession', sessionId);
+    });
 
-  socket.on('downloadProgress', (data) => {
-    // Update progress bar
-    updateProgress(data.progress);
+    socket.on('downloadProgress', (data) => {
+      // Update progress bar
+      updateProgress(data.progress);
 
-    // Update download speed
-    downloadSpeedElement.textContent = formatSpeed(data.currentSpeed);
+      // Update download speed
+      downloadSpeedElement.textContent = formatSpeed(data.currentSpeed);
 
-    // Update time remaining
-    timeRemainingElement.textContent = formatTimeRemaining(data.timeRemaining);
+      // Update time remaining
+      timeRemainingElement.textContent = formatTimeRemaining(data.timeRemaining);
 
-    // Update boost multiplier
-    boostMultiplierElement.textContent = data.boostMultiplier.toFixed(1) + 'x';
+      // Update boost multiplier
+      boostMultiplierElement.textContent = data.boostMultiplier.toFixed(1) + 'x';
 
-    // Add animation when boost changes
-    if (parseFloat(boostMultiplierElement.dataset.lastValue || '1.0') !== data.boostMultiplier) {
-      boostMultiplierElement.classList.add('pulse-animation');
-      setTimeout(() => {
-        boostMultiplierElement.classList.remove('pulse-animation');
-      }, 1000);
-      boostMultiplierElement.dataset.lastValue = data.boostMultiplier;
+      // Add animation when boost changes
+      if (parseFloat(boostMultiplierElement.dataset.lastValue || '1.0') !== data.boostMultiplier) {
+        boostMultiplierElement.classList.add('pulse-animation');
+        setTimeout(() => {
+          boostMultiplierElement.classList.remove('pulse-animation');
+        }, 1000);
+        boostMultiplierElement.dataset.lastValue = data.boostMultiplier;
+      }
+    });
+  } else {
+    // Simulate progress without WebSocket
+    let progress = 0;
+    const simulateProgress = () => {
+      progress += Math.random() * 0.5;
+      if (progress > 99.9) progress = 99.9;
+
+      updateProgress(progress);
+
+      // Simulate speed updates
+      if (Math.random() > 0.7) {
+        const multiplier = parseFloat(boostMultiplierElement.textContent) || 1;
+        const speed = 100 * 1024 * multiplier;
+        downloadSpeedElement.textContent = formatSpeed(speed);
+
+        const remainingSeconds = (100 - progress) * 10 / multiplier;
+        timeRemainingElement.textContent = formatTimeRemaining(remainingSeconds);
+      }
+
+      if (progress < 99.9) { requestAnimationFrame(simulateProgress); }
+      setTimeout(simulateProgress, 500);
     }
-  });
-  <% } else { %>
-  // Simulate progress without WebSocket
-  let progress = 0;
-  const simulateProgress = () => {
-    progress += Math.random() * 0.5;
-    if (progress > 99.9) progress = 99.9;
-
-    updateProgress(progress);
-
-    // Simulate speed updates
-    if (Math.random() > 0.7) {
-      const multiplier = parseFloat(boostMultiplierElement.textContent) || 1;
-      const speed = 100 * 1024 * multiplier;
-      downloadSpeedElement.textContent = formatSpeed(speed);
-
-      const remainingSeconds = (100 - progress) * 10 / multiplier;
-      timeRemainingElement.textContent = formatTimeRemaining(remainingSeconds);
-    }
-
-    if (progress < 99.9) {
-      requestAnimationFrame(simulateProgress);
-    }
-  };
-  setTimeout(simulateProgress, 500);
-  <% } %>
+  }
 
   function updateProgress(value) {
     progressBar.style.width = value + '%';
@@ -487,7 +499,7 @@
   }
 
   // Challenge form submission
-  challengeForm.addEventListener('submit', function(e) {
+  challengeForm.addEventListener('submit', function (e) {
     e.preventDefault();
     const userAnswer = answerInput.value.trim();
 
@@ -516,47 +528,47 @@
         difficulty: selectedDifficulty
       }),
     })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                // Update UI with success
-                showChallengeResult(data.message, 'success');
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Update UI with success
+          showChallengeResult(data.message, 'success');
 
-                // Add animation to boost multiplier
-                boostMultiplierElement.classList.add('pulse-animation');
-                setTimeout(() => {
-                  boostMultiplierElement.classList.remove('pulse-animation');
-                }, 1000);
+          // Add animation to boost multiplier
+          boostMultiplierElement.classList.add('pulse-animation');
+          setTimeout(() => {
+            boostMultiplierElement.classList.remove('pulse-animation');
+          }, 1000);
 
-                // Update boost multiplier
-                boostMultiplierElement.textContent = data.boostMultiplier.toFixed(1) + 'x';
-                boostMultiplierElement.dataset.lastValue = data.boostMultiplier;
+          // Update boost multiplier
+          boostMultiplierElement.textContent = data.boostMultiplier.toFixed(1) + 'x';
+          boostMultiplierElement.dataset.lastValue = data.boostMultiplier;
 
-                // Update speed display
-                downloadSpeedElement.textContent = formatSpeed(data.currentSpeed);
+          // Update speed display
+          downloadSpeedElement.textContent = formatSpeed(data.currentSpeed);
 
-                // Update to new challenge
-                if (data.newChallenge) {
-                  currentChallenge = data.newChallenge;
-                  challengeText.textContent = currentChallenge.questionText;
-                }
-              } else {
-                // Show error message
-                showChallengeResult(data.message, 'error');
-              }
+          // Update to new challenge
+          if (data.newChallenge) {
+            currentChallenge = data.newChallenge;
+            challengeText.textContent = currentChallenge.questionText;
+          }
+        } else {
+          // Show error message
+          showChallengeResult(data.message, 'error');
+        }
 
-              // Clear the answer field and re-enable form
-              answerInput.value = '';
-              answerInput.disabled = false;
-              challengeForm.querySelector('button').disabled = false;
-              answerInput.focus();
-            })
-            .catch(error => {
-              console.error('Error:', error);
-              showChallengeResult('Error connecting to server', 'error');
-              answerInput.disabled = false;
-              challengeForm.querySelector('button').disabled = false;
-            });
+        // Clear the answer field and re-enable form
+        answerInput.value = '';
+        answerInput.disabled = false;
+        challengeForm.querySelector('button').disabled = false;
+        answerInput.focus();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showChallengeResult('Error connecting to server', 'error');
+        answerInput.disabled = false;
+        challengeForm.querySelector('button').disabled = false;
+      });
   });
 
   // Helper function to show challenge result
@@ -606,7 +618,7 @@
 
   // Difficulty selection
   difficultyBtns.forEach(btn => {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', function () {
       // Update active state
       difficultyBtns.forEach(b => b.classList.remove('active'));
       this.classList.add('active');
@@ -630,17 +642,17 @@
           difficulty: selectedDifficulty
         }),
       })
-              .then(response => response.json())
-              .then(data => {
-                if (data.newChallenge) {
-                  currentChallenge = data.newChallenge;
-                  challengeText.textContent = currentChallenge.questionText;
-                }
-              })
-              .catch(error => {
-                console.error('Error:', error);
-                showChallengeResult('Error loading challenge', 'error');
-              });
+        .then(response => response.json())
+        .then(data => {
+          if (data.newChallenge) {
+            currentChallenge = data.newChallenge;
+            challengeText.textContent = currentChallenge.questionText;
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showChallengeResult('Error loading challenge', 'error');
+        });
     });
   });
 
@@ -668,7 +680,7 @@
   }
 
   // Focus the answer input when the page loads
-  window.onload = function() {
+  window.onload = function () {
     answerInput.focus();
   };
 </script>
