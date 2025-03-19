@@ -287,6 +287,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .qr-code img {
+    max-width: 100%;
+    height: auto;
   }
 
   .qr-hint {
@@ -310,22 +316,62 @@
   }
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <script>
+  // Load QR Code library dynamically
+  function loadQRCodeLibrary() {
+    return new Promise((resolve, reject) => {
+      if (window.QRCode) {
+        resolve(window.QRCode);
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+      script.onload = () => resolve(window.QRCode);
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  // Function to generate QR code
+  async function generateQRCode() {
+    try {
+      const shareUrl = '<%= shareUrl %>';
+      const qrCodeElement = document.getElementById('qrCode');
+      
+      if (!qrCodeElement) return;
+
+      // Clear any existing content
+      qrCodeElement.innerHTML = '';
+      qrCodeElement.style.border = '1px solid #1a1a1a';
+      
+      // Ensure QRCode library is loaded and create QR code
+      await loadQRCodeLibrary();
+      new QRCode(qrCodeElement, {
+        text: shareUrl,
+        width: 160,
+        height: 160,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    } catch (error) {
+      const qrCodeElement = document.getElementById('qrCode');
+      if (qrCodeElement) {
+        qrCodeElement.innerHTML = '<p style="color: red;">Error generating QR code. Please try refreshing the page.</p>';
+      }
+    }
+  }
+
   // Copy link functionality
   document.getElementById('copyButton').addEventListener('click', function() {
     const shareLink = document.getElementById('shareLink');
     shareLink.select();
     document.execCommand('copy');
 
-    // Show the copy message
     const copyMessage = document.getElementById('copyMessage');
     copyMessage.style.display = 'flex';
-
-    // Hide the message after 3 seconds
-    setTimeout(() => {
-      copyMessage.style.display = 'none';
-    }, 3000);
+    setTimeout(() => copyMessage.style.display = 'none', 3000);
   });
 
   // Share tabs functionality
@@ -341,20 +387,19 @@
       this.classList.add('active');
 
       // Show active tab content
-      tabContents.forEach(content => {
-        content.classList.remove('active');
-      });
+      tabContents.forEach(content => content.classList.remove('active'));
       document.getElementById(`${tabId}-content`).classList.add('active');
+
+      // Generate QR code if switching to QR tab
+      if (tabId === 'qr') generateQRCode();
     });
   });
 
-  // Generate QR code
-  window.onload = function() {
-    const shareUrl = '<%= shareUrl %>';
-    const qr = qrcode(0, 'M');
-    qr.addData(shareUrl);
-    qr.make();
-
-    document.getElementById('qrCode').innerHTML = qr.createImgTag(5);
-  };
+  // Generate QR code if QR tab is active on page load
+  window.addEventListener('load', function() {
+    const qrTab = document.querySelector('.share-tab[data-tab="qr"]');
+    if (qrTab?.classList.contains('active')) generateQRCode();
+  });
 </script>
+
+

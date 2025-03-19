@@ -186,8 +186,8 @@ async function deploy() {
             return;
           }
           
-          const localEcosystemFile = path.join(__dirname, 'ecosystem.config.js');
-          const remoteEcosystemFile = `${config.remotePath}/ecosystem.config.js`;
+          const localEcosystemFile = path.join(__dirname, 'ecosystem.config.cjs');
+          const remoteEcosystemFile = `${config.remotePath}/ecosystem.config.cjs`;
           
           console.log(`Uploading file: ${localEcosystemFile} -> ${remoteEcosystemFile}`);
           sftp.fastPut(localEcosystemFile, remoteEcosystemFile, (err) => {
@@ -243,7 +243,7 @@ async function deploy() {
       // Step 7: Start or restart PM2 service
       if (isFirstTime) {
         console.log('========== First-time deployment: Starting PM2 ==========');
-        await executeRemoteCommand(conn, `cd ${config.remotePath} && pm2 start ecosystem.config.js`);
+        await executeRemoteCommand(conn, `cd ${config.remotePath} && pm2 start ecosystem.config.cjs`);
         
         // Optionally save PM2 process list to auto-start on server reboot
         console.log('========== Saving PM2 process list ==========');
