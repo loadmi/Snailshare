@@ -12,7 +12,7 @@ const uploadDir = process.env.UPLOAD_DIR || './userfiles';
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
-export default {
+const config = {
     server: {
         port: process.env.PORT || 443,
         env: process.env.NODE_ENV || 'development',
@@ -23,7 +23,7 @@ export default {
         sessionSecret: process.env.SESSION_SECRET || 'default_session_secret_change_me',
     },
     files: {
-        maxSize: parseInt(process.env.MAX_FILE_SIZE || '50000000', 10), // 50MB default
+        maxSize: parseInt(process.env.MAX_FILE_SIZE || '1000000000', 10), // 1GB default
         uploadDir: uploadDir,
         expiryDays: parseInt(process.env.FILE_EXPIRY_DAYS || '7', 10),
     },
@@ -36,3 +36,4 @@ export default {
         certPath: process.env.SSL_CERT_PATH || join(__dirname, '../../cert.pem'),
     },
 };
+export default config;

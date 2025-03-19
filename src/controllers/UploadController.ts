@@ -5,8 +5,8 @@ import fileService from '../services/FileService.js';
 import { isValidFile } from '../middleware/fileValidation.js';
 import config from '../config/index.js';
 
-import pkg, {Fields, Files} from 'formidable';
-const { IncomingForm } = pkg;
+import formidable, { Fields, Files } from 'formidable';
+
 class UploadController {
     async showUploadPage(req: Request, res: Response): Promise<void> {
         res.render('home', {
@@ -18,16 +18,24 @@ class UploadController {
         try {
             // Configure formidable
             const uploadDir = path.resolve(config.files.uploadDir);
-            const form = new IncomingForm({
+            const form = formidable({
                 uploadDir,
                 keepExtensions: true,
                 maxFileSize: config.files.maxSize,
+                maxTotalFileSize: config.files.maxSize,
+                allowEmptyFiles: false,
+                filter: (part) => {
+                    return part.mimetype !== null;
+                },
+                multiples: false,
+                maxFields: 1,
+                maxFieldsSize: 1024 * 1024 // 1MB for form fields
             });
 
             // Helper function to wrap form.parse in a promise
             const parseForm = (
                 req: Request,
-                form: InstanceType<typeof IncomingForm>
+                form: ReturnType<typeof formidable>
             ): Promise<[Fields, Files]> => {
                 return new Promise((resolve, reject) => {
                     form.parse(req, (err: any, fields: Fields, files: Files) => {
@@ -90,9 +98,17 @@ class UploadController {
             });
         } catch (error) {
             console.error('Upload error:', error);
+            // Log more details about the error
+            if (error instanceof Error) {
+                console.error('Error name:', error.name);
+                console.error('Error message:', error.message);
+                console.error('Error stack:', error.stack);
+            }
             res.status(500).render('error', {
                 title: 'Upload Error',
-                message: 'An error occurred while uploading your file.'
+                message: config.server.env === 'production' 
+                    ? 'An error occurred while uploading your file.'
+                    : error instanceof Error ? error.message : 'Unknown error occurred'
             });
         }
     }

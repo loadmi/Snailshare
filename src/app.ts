@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -52,8 +54,8 @@ app.use(compression());
 app.use(morgan('dev'));
 
 // Body parsing middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '2gb' }));
+app.use(express.urlencoded({ extended: true, limit: '2gb' }));
 
 // Session middleware
 app.use(
