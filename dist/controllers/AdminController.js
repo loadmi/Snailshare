@@ -50,6 +50,16 @@ class AdminController {
             const baseRate = await throttleService.getBaseRate();
             // Format files for display
             const formattedFiles = files.map((file) => {
+                // Check if metadata exists, if not provide default values
+                if (!file.metadata) {
+                    console.warn(`File with ID ${file.id || 'unknown'} has missing metadata`);
+                    return {
+                        ...file,
+                        formattedSize: 'Unknown',
+                        timeAgo: 'Unknown',
+                        expiresIn: 'Unknown'
+                    };
+                }
                 return {
                     ...file,
                     formattedSize: formatFileSize(file.metadata.size),

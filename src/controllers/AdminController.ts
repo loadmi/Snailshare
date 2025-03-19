@@ -59,6 +59,17 @@ class AdminController {
 
             // Format files for display
             const formattedFiles = files.map((file: any) => {
+                // Check if metadata exists, if not provide default values
+                if (!file.metadata) {
+                    console.warn(`File with ID ${file.id || 'unknown'} has missing metadata`);
+                    return {
+                        ...file,
+                        formattedSize: 'Unknown',
+                        timeAgo: 'Unknown',
+                        expiresIn: 'Unknown'
+                    };
+                }
+                
                 return {
                     ...file,
                     formattedSize: formatFileSize(file.metadata.size),
