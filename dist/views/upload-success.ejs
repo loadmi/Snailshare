@@ -1,0 +1,360 @@
+<div class="success-container">
+  <div class="success-animation">
+    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+      <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+      <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+    </svg>
+  </div>
+
+  <h1>Upload Successful!</h1>
+
+  <div class="file-details">
+    <h2>File Details</h2>
+    <div class="file-card">
+      <div class="file-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+      </div>
+      <div class="file-info">
+        <p class="file-name"><%= fileName %></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="share-section">
+    <h2>Share Your File</h2>
+
+    <div class="share-tabs">
+      <button class="share-tab active" data-tab="link">Link</button>
+      <button class="share-tab" data-tab="qr">QR Code</button>
+    </div>
+
+    <div class="share-content">
+      <div class="share-tab-content active" id="link-content">
+        <div class="share-link-container">
+          <input type="text" id="shareLink" value="<%= shareUrl %>" readonly>
+          <button id="copyButton" class="copy-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+            </svg>
+            Copy
+          </button>
+        </div>
+        <div id="copyMessage" class="copy-message">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          Link copied to clipboard!
+        </div>
+      </div>
+
+      <div class="share-tab-content" id="qr-content">
+        <div class="qr-container">
+          <div id="qrCode" class="qr-code"></div>
+          <p class="qr-hint">Scan with your phone's camera</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <a href="/" class="btn btn-primary">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+      </svg>
+      Upload Another File
+    </a>
+    <a href="<%= shareUrl %>" class="btn btn-outline">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="8 9 12 5 16 9"></polyline>
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+      </svg>
+      Test Download
+    </a>
+  </div>
+</div>
+
+<style>
+  .success-container {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .success-animation {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 2rem;
+  }
+
+  .checkmark {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: block;
+    stroke-width: 2;
+    stroke: var(--success);
+    stroke-miterlimit: 10;
+    box-shadow: inset 0 0 0 var(--success);
+    animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+  }
+
+  .checkmark-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 2;
+    stroke-miterlimit: 10;
+    stroke: var(--success);
+    fill: none;
+    animation: stroke .6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+  }
+
+  .checkmark-check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: stroke .3s cubic-bezier(0.65, 0, 0.45, 1) .8s forwards;
+  }
+
+  @keyframes stroke {
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes scale {
+    0%, 100% {
+      transform: none;
+    }
+    50% {
+      transform: scale3d(1.1, 1.1, 1);
+    }
+  }
+
+  @keyframes fill {
+    100% {
+      box-shadow: inset 0 0 0 30px rgba(16, 185, 129, 0.1);
+    }
+  }
+
+  .file-details {
+    margin: 2rem 0;
+  }
+
+  .file-card {
+    display: flex;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+
+  .file-icon {
+    margin-right: 1rem;
+    color: var(--gray-300);
+  }
+
+  .file-info {
+    flex-grow: 1;
+    overflow: hidden;
+  }
+
+  .file-name {
+    margin: 0;
+    font-weight: 500;
+    word-break: break-all;
+  }
+
+  .share-section {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .share-tabs {
+    display: flex;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1.5rem;
+  }
+
+  .share-tab {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    color: var(--gray-300);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .share-tab:hover {
+    color: var(--light);
+    background: transparent;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .share-tab.active {
+    color: var(--primary-light);
+  }
+
+  .share-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--primary-light);
+  }
+
+  .share-tab-content {
+    display: none;
+  }
+
+  .share-tab-content.active {
+    display: block;
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .share-link-container {
+    display: flex;
+    margin-bottom: 0.5rem;
+  }
+
+  #shareLink {
+    flex-grow: 1;
+    padding: 0.75rem 1rem;
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: none;
+    border-radius: var(--radius) 0 0 var(--radius);
+    color: var(--light);
+    font-size: 1rem;
+  }
+
+  .copy-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .copy-button:hover {
+    background: var(--primary-dark);
+  }
+
+  .copy-message {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--success);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+  }
+
+  .qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .qr-code {
+    background: white;
+    padding: 1rem;
+    border-radius: var(--radius);
+    height: 200px;
+    width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .qr-hint {
+    font-size: 0.875rem;
+    color: var(--gray-300);
+    opacity: 0.8;
+    margin: 0;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    justify-content: center;
+  }
+
+  @media (max-width: 768px) {
+    .action-buttons {
+      flex-direction: column;
+    }
+  }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script>
+  // Copy link functionality
+  document.getElementById('copyButton').addEventListener('click', function() {
+    const shareLink = document.getElementById('shareLink');
+    shareLink.select();
+    document.execCommand('copy');
+
+    // Show the copy message
+    const copyMessage = document.getElementById('copyMessage');
+    copyMessage.style.display = 'flex';
+
+    // Hide the message after 3 seconds
+    setTimeout(() => {
+      copyMessage.style.display = 'none';
+    }, 3000);
+  });
+
+  // Share tabs functionality
+  const tabs = document.querySelectorAll('.share-tab');
+  const tabContents = document.querySelectorAll('.share-tab-content');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+      const tabId = this.dataset.tab;
+
+      // Update active tab
+      tabs.forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+
+      // Show active tab content
+      tabContents.forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(`${tabId}-content`).classList.add('active');
+    });
+  });
+
+  // Generate QR code
+  window.onload = function() {
+    const shareUrl = '<%= shareUrl %>';
+    const qr = qrcode(0, 'M');
+    qr.addData(shareUrl);
+    qr.make();
+
+    document.getElementById('qrCode').innerHTML = qr.createImgTag(5);
+  };
+</script>

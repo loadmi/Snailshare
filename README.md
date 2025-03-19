@@ -30,6 +30,52 @@ src/
 
 *Instructions for setup and installation coming soon... just give us time to crawl there!*
 
+## Deployment
+
+### Local Development
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+### Production Deployment with PM2
+
+1. Create a `deploy-config.json` file with your server details:
+```json
+{
+  "host": "your-server-ip",
+  "username": "your-username",
+  "password": "your-password",
+  "port": 22,
+  "remotePath": "/path/to/deployment/directory",
+  "pm2AppName": "fancy-server"
+}
+```
+
+2. For first-time deployment:
+```bash
+npm run deploy:first-time
+```
+
+3. For subsequent deployments:
+```bash
+npm run deploy
+```
+
+This will:
+- Build the project
+- Upload all files to your server
+- Install dependencies on the server
+- Start/restart the PM2 service
+
+Note: Make sure PM2 is installed on your server.
+
 ---
 
 *Remember: Life's a garden, dig it—just watch out for the snails using our app!*

@@ -1,0 +1,909 @@
+<div class="admin-header">
+  <h1>Admin Dashboard</h1>
+  <div class="admin-actions">
+    <button id="backupBtn" class="btn btn-outline btn-small">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+      </svg>
+      Download Backup
+    </button>
+    <button id="cleanupBtn" class="btn btn-warning btn-small">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 6h18"></path>
+        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+      </svg>
+      Clean Expired Files
+    </button>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+      </svg>
+    </div>
+    <div class="stat-content">
+      <h3>Active Downloads</h3>
+      <p class="stat-value"><%= sessionCount %></p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <polyline points="10 9 9 9 8 9"></polyline>
+      </svg>
+    </div>
+    <div class="stat-content">
+      <h3>Total Files</h3>
+      <p class="stat-value"><%= files.length %></p>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+    </div>
+    <div class="stat-content">
+      <h3>Download Rate</h3>
+      <p class="stat-value"><%= (baseRate / 1024).toFixed(2) %> KB/s</p>
+    </div>
+  </div>
+</div>
+
+<div class="admin-panel">
+  <div class="panel-tabs">
+    <button class="panel-tab active" data-tab="files">Files</button>
+    <button class="panel-tab" data-tab="downloads">Active Downloads</button>
+    <button class="panel-tab" data-tab="settings">Settings</button>
+  </div>
+
+  <div class="panel-content">
+    <!-- Files Tab -->
+    <div class="tab-content active" id="files-content">
+      <div class="panel-header">
+        <h2>All Files</h2>
+      </div>
+
+      <% if (files.length === 0) { %>
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <p>No files have been uploaded yet</p>
+          <p class="empty-hint">When users upload files, they will appear here</p>
+        </div>
+      <% } else { %>
+        <div class="table-container">
+          <table id="filesTable">
+            <thead>
+            <tr>
+              <th>Original Name</th>
+              <th>Size</th>
+              <th>Upload Date</th>
+              <th>Expiry Date</th>
+              <th>Downloads</th>
+              <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <% files.forEach(file => { %>
+              <tr data-file-id="<%= file.id %>">
+                <td title="<%= file.originalName %>"><div class="text-truncate"><%= file.originalName %></div></td>
+                <td><%= formatFileSize(file.size) %></td>
+                <td><%= new Date(file.uploadDate).toLocaleString() %></td>
+                <td><%= new Date(file.expiryDate).toLocaleString() %></td>
+                <td><%= file.downloadCount %></td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="btn-icon copy-btn" data-token="<%= file.token %>" title="Copy Link">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                      </svg>
+                    </button>
+                    <button class="btn-icon delete-btn" title="Delete File">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Downloads Tab -->
+    <div class="tab-content" id="downloads-content">
+      <div class="panel-header">
+        <h2>Active Downloads</h2>
+      </div>
+
+      <% if (Object.keys(sessions).length === 0) { %>
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </div>
+          <p>No active downloads at the moment</p>
+          <p class="empty-hint">When users download files, their sessions will appear here</p>
+        </div>
+      <% } else { %>
+        <div class="table-container">
+          <table id="sessionsTable">
+            <thead>
+            <tr>
+              <th>Session ID</th>
+              <th>File</th>
+              <th>Speed</th>
+              <th>Boost</th>
+              <th>Started</th>
+              <th>Challenges</th>
+            </tr>
+            </thead>
+            <tbody>
+            <% Object.entries(sessions).forEach(([id, session]) => { %>
+              <tr>
+                <td><span class="session-id"><%= id.substring(0, 8) %>...</span></td>
+                <td><div class="text-truncate"><%= session.fileId %></div></td>
+                <td><%= formatFileSize(session.currentSpeed) %>/s</td>
+                <td>
+                  <span class="boost-multiplier"><%= session.boostMultiplier.toFixed(1) %>x</span>
+                </td>
+                <td><%= formatTimeAgo(session.startTime) %></td>
+                <td><span class="challenge-count"><%= session.challengesSolved %></span></td>
+              </tr>
+            <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Settings Tab -->
+    <div class="tab-content" id="settings-content">
+      <div class="panel-header">
+        <h2>System Settings</h2>
+      </div>
+
+      <div class="settings-card">
+        <h3>Download Speed</h3>
+        <p>Configure the base download rate for all users</p>
+
+        <form id="rateForm" class="settings-form">
+          <div class="form-group">
+            <label for="baseRate">Base Download Rate (bytes/sec)</label>
+            <div class="input-group">
+              <input type="number" id="baseRate" name="rate" value="<%= baseRate %>" min="1024" step="1024" required>
+              <button type="submit" class="btn btn-primary">Update</button>
+            </div>
+            <span class="form-hint">Higher values mean faster default downloads</span>
+          </div>
+        </form>
+      </div>
+
+      <div class="settings-card">
+        <h3>Danger Zone</h3>
+        <p>These actions cannot be undone</p>
+
+        <div class="danger-actions">
+          <button id="clearBtn" class="btn btn-danger">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            Clear All Data
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  :root {
+    --primary: #4F46E5;
+    --primary-dark: #4338CA;
+    --primary-light: #818CF8;
+    --secondary: #06B6D4;
+    --secondary-dark: #0891B2;
+    --accent: #F472B6;
+    --dark: #1E293B;
+    --darker: #0F172A;
+    --light: #F8FAFC;
+    --gray-100: #F1F5F9;
+    --gray-200: #E2E8F0;
+    --gray-300: #CBD5E1;
+    --gray-600: #475569;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --error: #EF4444;
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    --radius-sm: 0.375rem;
+    --radius: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-full: 9999px;
+  }
+  /* Admin Header Styles */
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .admin-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  /* Stats Grid Styles */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .stat-icon {
+    width: 3rem;
+    height: 3rem;
+    background: rgba(79, 70, 229, 0.1);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: var(--primary-light);
+  }
+
+  .stat-content {
+    flex-grow: 1;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--light);
+  }
+
+  /* Panel Styles */
+  .admin-panel {
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .panel-tabs {
+    display: flex;
+    background: rgba(15, 23, 42, 0.6);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .panel-tab {
+    padding: 1rem 1.5rem;
+    background: transparent;
+    border: none;
+    color: var(--gray-300);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .panel-tab:hover {
+    color: var(--light);
+    background: transparent;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .panel-tab.active {
+    color: var(--primary-light);
+  }
+
+  .panel-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--primary-light);
+  }
+
+  .panel-content {
+    padding: 1.5rem;
+  }
+
+  .tab-content {
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .panel-header h2 {
+    margin: 0;
+  }
+
+  /* Empty State Styles */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+
+  .empty-icon {
+    width: 4rem;
+    height: 4rem;
+    background: rgba(79, 70, 229, 0.1);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: var(--gray-300);
+  }
+
+  .empty-hint {
+    font-size: 0.875rem;
+    color: var(--gray-300);
+    opacity: 0.7;
+    margin-top: 0.5rem;
+  }
+
+  /* Table Styles */
+  .table-container {
+    margin: 0;
+    overflow-x: auto;
+    border-radius: var(--radius);
+  }
+
+  table {
+    color: var(--gray-300);
+  }
+
+  thead {
+    background: rgba(15, 23, 42, 0.6);
+  }
+
+  th, td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+  }
+
+  th {
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    color: var(--gray-200);
+  }
+
+  td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  .text-truncate {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .session-id {
+    font-family: monospace;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+  }
+
+  .boost-multiplier {
+    display: inline-block;
+    background: rgba(79, 70, 229, 0.2);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-weight: 500;
+    color: var(--primary-light);
+  }
+
+  .challenge-count {
+    display: inline-block;
+    background: rgba(16, 185, 129, 0.2);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-weight: 500;
+    color: var(--success);
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .btn-icon {
+    background: transparent;
+    border: none;
+    color: var(--gray-300);
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+  }
+
+  .btn-icon:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--light);
+    transform: none;
+    box-shadow: none;
+  }
+
+  .delete-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--error);
+  }
+
+  .copy-btn:hover {
+    background: rgba(79, 70, 229, 0.2);
+    color: var(--primary-light);
+  }
+
+  /* Settings Styles */
+  .settings-card {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .settings-card h3 {
+    margin-top: 0;
+    font-size: 1.25rem;
+  }
+
+  .settings-form {
+    margin-top: 1.5rem;
+  }
+
+  .input-group {
+    display: flex;
+  }
+
+  .input-group input {
+    border-radius: var(--radius) 0 0 var(--radius);
+    border-right: none;
+  }
+
+  .input-group button {
+    border-radius: 0 var(--radius) var(--radius) 0;
+  }
+
+  .form-hint {
+    display: block;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    color: var(--gray-300);
+    opacity: 0.7;
+  }
+
+  .danger-actions {
+    margin-top: 1.5rem;
+  }
+
+  .btn-warning {
+    background: var(--warning);
+    color: var(--darker);
+  }
+
+  .btn-warning:hover {
+    background: #e59000;
+    color: var(--darker);
+  }
+
+  .btn-danger {
+    background: var(--error);
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: #d32f2f;
+  }
+
+  @media (max-width: 768px) {
+    .admin-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // Tab switching functionality
+  const tabs = document.querySelectorAll('.panel-tab');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+      const tabId = this.dataset.tab;
+
+      // Update active tab
+      tabs.forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+
+      // Show active tab content
+      tabContents.forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(`${tabId}-content`).classList.add('active');
+    });
+  });
+
+  // Delete file functionality
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const fileId = this.closest('tr').dataset.fileId;
+      if (!fileId) return;
+
+      if (confirm('Are you sure you want to delete this file? This action cannot be undone.')) {
+        fetch(`/admin/files/${fileId}`, {
+          method: 'DELETE',
+        })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.success) {
+                    this.closest('tr').remove();
+
+                    // Show toast notification
+                    showToast('File deleted successfully', 'success');
+                  } else {
+                    showToast('Failed to delete file: ' + (data.message || 'Unknown error'), 'error');
+                  }
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                  showToast('An error occurred while deleting the file', 'error');
+                });
+      }
+    });
+  });
+
+  // Copy link functionality
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const token = this.dataset.token;
+      if (!token) return;
+
+      const link = `${window.location.origin}/start?file=${token}`;
+
+      navigator.clipboard.writeText(link)
+              .then(() => {
+                showToast('Link copied to clipboard', 'success');
+              })
+              .catch(err => {
+                console.error('Failed to copy: ', err);
+                showToast('Failed to copy link', 'error');
+              });
+    });
+  });
+
+  // Update rate functionality
+  document.getElementById('rateForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const rate = parseInt(document.getElementById('baseRate').value, 10);
+
+    if (isNaN(rate) || rate <= 0) {
+      showToast('Please enter a valid rate', 'error');
+      return;
+    }
+
+    fetch('/admin/settings/rate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ rate }),
+    })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showToast('Rate updated successfully', 'success');
+              } else {
+                showToast('Failed to update rate: ' + (data.message || 'Unknown error'), 'error');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              showToast('An error occurred while updating the rate', 'error');
+            });
+  });
+
+  // Cleanup expired files functionality
+  document.getElementById('cleanupBtn').addEventListener('click', function() {
+    fetch('/admin/cleanup', {
+      method: 'POST',
+    })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                showToast(data.message || 'Cleanup completed successfully', 'success');
+                setTimeout(() => location.reload(), 1500);
+              } else {
+                showToast('Cleanup failed: ' + (data.message || 'Unknown error'), 'error');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              showToast('An error occurred during cleanup', 'error');
+            });
+  });
+
+  // Download backup functionality
+  document.getElementById('backupBtn').addEventListener('click', function() {
+    window.location.href = '/admin/backup';
+  });
+
+  // Clear database functionality
+  document.getElementById('clearBtn').addEventListener('click', function() {
+    if (confirm('WARNING: This will delete ALL files and records. This action cannot be undone. Are you sure?')) {
+      if (prompt('Type "DELETE ALL" to confirm this destructive action:') === 'DELETE ALL') {
+        fetch('/admin/clear', {
+          method: 'POST',
+        })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.success) {
+                    showToast('Database cleared successfully', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                  } else {
+                    showToast('Failed to clear database: ' + (data.message || 'Unknown error'), 'error');
+                  }
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                  showToast('An error occurred while clearing the database', 'error');
+                });
+      } else {
+        showToast('Database clear cancelled', 'warning');
+      }
+    }
+  });
+
+  // Toast notification system
+  function showToast(message, type = 'info') {
+    // Create toast container if it doesn't exist
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+      toastContainer = document.createElement('div');
+      toastContainer.className = 'toast-container';
+      document.body.appendChild(toastContainer);
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+
+    let icon = '';
+    if (type === 'success') {
+      icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    } else if (type === 'error') {
+      icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+    } else if (type === 'warning') {
+      icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+    } else {
+      icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+    }
+
+    toast.innerHTML = `
+      <div class="toast-icon">${icon}</div>
+      <div class="toast-message">${message}</div>
+      <button class="toast-close">×</button>
+    `;
+
+    // Add toast to container
+    toastContainer.appendChild(toast);
+
+    // Add styles if they don't exist
+    if (!document.getElementById('toast-styles')) {
+      const style = document.createElement('style');
+      style.id = 'toast-styles';
+      style.textContent = `
+        .toast-container {
+          position: fixed;
+          bottom: 1rem;
+          right: 1rem;
+          z-index: 9999;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          max-width: 320px;
+        }
+
+        .toast {
+          display: flex;
+          align-items: center;
+          background: var(--darker);
+          border-left: 3px solid var(--primary);
+          border-radius: var(--radius);
+          padding: 0.75rem 1rem;
+          box-shadow: var(--shadow-md);
+          animation: slideIn 0.3s ease-out forwards;
+          margin-top: 0.5rem;
+        }
+
+        .toast-success {
+          border-color: var(--success);
+        }
+
+        .toast-error {
+          border-color: var(--error);
+        }
+
+        .toast-warning {
+          border-color: var(--warning);
+        }
+
+        .toast-icon {
+          margin-right: 0.75rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .toast-success .toast-icon {
+          color: var(--success);
+        }
+
+        .toast-error .toast-icon {
+          color: var(--error);
+        }
+
+        .toast-warning .toast-icon {
+          color: var(--warning);
+        }
+
+        .toast-message {
+          flex-grow: 1;
+          font-size: 0.875rem;
+        }
+
+        .toast-close {
+          background: transparent;
+          border: none;
+          color: var(--gray-300);
+          font-size: 1.25rem;
+          cursor: pointer;
+          padding: 0 0.25rem;
+          line-height: 1;
+          height: 1.5rem;
+          width: 1.5rem;
+          border-radius: var(--radius-full);
+          margin-left: 0.5rem;
+        }
+
+        .toast-close:hover {
+          background: rgba(255, 255, 255, 0.1);
+          color: var(--light);
+        }
+
+        @keyframes slideIn {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+
+        @keyframes slideOut {
+          from {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          to {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // Add close button functionality
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn.addEventListener('click', () => {
+      toast.style.animation = 'slideOut 0.3s ease-out forwards';
+      setTimeout(() => {
+        toast.remove();
+      }, 300);
+    });
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.style.animation = 'slideOut 0.3s ease-out forwards';
+        setTimeout(() => {
+          if (toast.parentNode) {
+            toast.remove();
+          }
+        }, 300);
+      }
+    }, 5000);
+  }
+</script>
