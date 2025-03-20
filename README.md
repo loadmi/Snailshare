@@ -1,3 +1,5 @@
+## PROJECT HAS MOVED TO https://github.com/goblin-crew
+
 🐌 SnailShare - Because Sharing at a Snail's Pace is Still Sharing!
 Repository for SnailShare: The file-sharing platform that's so user-friendly, even gastropods can use it!
 Description
