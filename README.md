@@ -1,4 +1,4 @@
-## PROJECT HAS MOVED TO [https://github.com/goblin-crew](https://github.com/goblin-crew/Snailshare)
+## PROJECT HAS MOVED TO https://github.com/goblin-crew/Snailshare
 ## This repository has been orphaned and is only left for continuity
 
 🐌 SnailShare - Because Sharing at a Snail's Pace is Still Sharing!
