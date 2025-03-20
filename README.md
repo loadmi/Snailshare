@@ -1,4 +1,5 @@
-## PROJECT HAS MOVED TO https://github.com/goblin-crew
+## PROJECT HAS MOVED TO [https://github.com/goblin-crew](https://github.com/goblin-crew/Snailshare)
+## This repository has been orphaned and is only left for continuity
 
 🐌 SnailShare - Because Sharing at a Snail's Pace is Still Sharing!
 Repository for SnailShare: The file-sharing platform that's so user-friendly, even gastropods can use it!
